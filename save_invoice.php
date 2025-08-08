@@ -9,10 +9,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $customer_id = $_POST['customer_id'];
     $discount = floatval($_POST['discount']);
     $tax = floatval($_POST['tax']);
-    $fbr_invoice_no = $_POST['fbr_invoice_no'];           // new
-    $po_no = $_POST['po_no'];                             // new
-    $terms_of_payment = $_POST['terms_of_payment'];       // new
-    $created_at = $_POST['created_at'];                   // new
+    $fbr_invoice_no = $_POST['fbr_invoice_no'];
+    $po_no = $_POST['po_no'];
+    $terms_of_payment = $_POST['terms_of_payment'];
+    $created_at = $_POST['created_at'] ?? date('Y-m-d H:i:s');
 
     $gross_total = array_sum(array_map('floatval', $_POST['excl_tax_amt']));
     $after_discount = $gross_total - ($gross_total * $discount / 100);
