@@ -243,6 +243,13 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
 
 <body>
     <div class="container py-4">
+
+        <!-- Buttons -->
+        <div class="mb-4 text-center no-print">
+            <a href="index.php" class="btn btn-secondary me-2">Back</a>
+            <button class="btn btn-primary" onclick="downloadPDF()">Export as PDF</button>
+        </div>
+
         <div class="invoice-box" id="invoice-content">
 
             <!-- Company Info -->
@@ -376,12 +383,6 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                     <p><strong>THANK YOU FOR YOUR BUSINESS !</strong></p>
                 </div>
             </div>
-        </div>
-
-        <!-- Buttons -->
-        <div class="mt-4 text-center no-print">
-            <a href="index.php" class="btn btn-secondary me-2">Back</a>
-            <button class="btn btn-primary" onclick="downloadPDF()">Export as PDF</button>
         </div>
     </div>
 
