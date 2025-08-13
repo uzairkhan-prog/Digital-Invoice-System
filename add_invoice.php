@@ -4,6 +4,19 @@ require 'db.php';
 // Fetch customers for selection dropdown
 $stmt = $pdo->query("SELECT id, code, name FROM customers ORDER BY name");
 $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch last serial number from invoices table
+$stmt = $pdo->query("SELECT serial_no FROM invoices ORDER BY id DESC LIMIT 1");
+$lastSerial = $stmt->fetchColumn();
+
+if ($lastSerial) {
+    $nextSerial = intval($lastSerial) + 1;
+} else {
+    $nextSerial = 1;
+}
+
+// Format with leading zeros (e.g. 001, 002, 003...)
+$serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
 ?>
 
 <!DOCTYPE html>
@@ -83,7 +96,8 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label for="serial_no" class="form-label">Serial No</label>
-                        <input type="text" class="form-control" id="serial_no" name="serial_no" value="<?= date('YmdHis') ?>" required>
+                        <input type="text" class="form-control" id="serial_no" name="serial_no"
+                            value="<?= $serialNo ?>" readonly required>
                     </div>
                     <div class="col-md-3">
                         <label for="date" class="form-label">Date</label>
@@ -130,7 +144,7 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <table class="table table-bordered align-middle" id="itemsTable">
                         <thead>
                             <tr>
-                                <th>Item Code</th>
+                                <!-- <th>Item Code</th> -->
                                 <th>H.S Code</th>
                                 <th>Item Name</th>
                                 <th>Qty</th>
@@ -145,7 +159,7 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         </thead>
                         <tbody>
                             <tr>
-                                <td><input type="text" name="item_code[]" class="form-control"></td>
+                                <!-- <td><input type="text" name="item_code[]" class="form-control"></td> -->
                                 <td><input type="text" name="hs_code[]" class="form-control"></td>
                                 <td><input type="text" name="item_name[]" class="form-control"></td>
                                 <td><input type="number" step="1" min="0" name="qty[]" class="form-control qty"></td>

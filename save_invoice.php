@@ -14,12 +14,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $terms_of_payment = $_POST['terms_of_payment'];
     $created_at = $_POST['created_at'] ?? date('Y-m-d H:i:s');
 
+    // Calculate totals
     $gross_total = array_sum(array_map('floatval', $_POST['excl_tax_amt']));
     $after_discount = $gross_total - ($gross_total * $discount / 100);
     $grand_total = $after_discount + ($after_discount * $tax / 100);
 
     $pdo->beginTransaction();
     try {
+        // Insert into invoices table
         $stmt = $pdo->prepare("
             INSERT INTO invoices (
                 serial_no, date, invoice_type, scenario_id,
@@ -46,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $invoice_id = $pdo->lastInsertId();
 
+        // Prepare invoice items insert
         $item_stmt = $pdo->prepare("
             INSERT INTO invoice_items (
                 invoice_id, item_code, hs_code, item_name, qty,
@@ -53,12 +56,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
-        foreach ($_POST['item_code'] as $i => $code) {
+        foreach ($_POST['item_name'] as $i => $itemName) {
+            // Skip if all main fields are empty
+            if (
+                empty(trim($itemName)) &&
+                empty(trim($_POST['item_code'][$i])) &&
+                empty(trim($_POST['hs_code'][$i]))
+            ) {
+                continue;
+            }
+
             $item_stmt->execute([
                 $invoice_id,
-                $_POST['item_code'][$i],
+                !empty(trim($_POST['item_code'][$i])) ? $_POST['item_code'][$i] : null, // Nullable item_code
                 $_POST['hs_code'][$i],
-                $_POST['item_name'][$i],
+                $itemName,
                 $_POST['qty'][$i],
                 $_POST['unit'][$i],
                 $_POST['rate'][$i],

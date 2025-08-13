@@ -137,6 +137,7 @@ foreach ($invoices as $inv) {
                 <a href="add_invoice.php" class="btn btn-success">+ Add Invoice</a>
                 <a href="add_customer.php" class="btn btn-outline-secondary">+ Add Customer</a>
                 <a href="customers.php" class="btn btn-primary">View Customers</a>
+                <a href="hs_code.php" class="btn btn-info">View HS Code</a>
             </div>
         </div>
 
@@ -178,9 +179,11 @@ foreach ($invoices as $inv) {
                         </thead>
                         <tbody>
                             <?php if ($invoices): ?>
+                                <?php $rowNum = 1; // Start counter
+                                ?>
                                 <?php foreach ($invoices as $inv): ?>
                                     <tr>
-                                        <td><?= $inv['id'] ?></td>
+                                        <td><?= $rowNum++ ?></td> <!-- Sequential number -->
                                         <td><?= htmlspecialchars($inv['serial_no']) ?></td>
                                         <td><?= htmlspecialchars($inv['date']) ?></td>
                                         <td><?= htmlspecialchars($inv['customer_name']) ?></td>
@@ -205,6 +208,7 @@ foreach ($invoices as $inv) {
                                 </tr>
                             <?php endif; ?>
                         </tbody>
+
                     </table>
                 </div>
             </div>

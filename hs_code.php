@@ -2,15 +2,15 @@
 require 'db.php';
 
 // Fetch all customers
-$stmt = $pdo->query("SELECT * FROM customers ORDER BY name");
-$customers = $stmt->fetchAll();
+$stmt = $pdo->query("SELECT * FROM hs_codes ORDER BY name");
+$hs_codes = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <title>Customer List</title>
+    <title>HS Code</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -65,9 +65,9 @@ $customers = $stmt->fetchAll();
 
     <div class="container py-5">
         <div class="page-header mb-4">
-            <h2 class="fw-bold mb-3">👥 Customer Management</h2>
+            <h2 class="fw-bold mb-3">🏷 HS Code Management</h2>
             <div class="d-flex flex-wrap gap-2">
-                <a href="add_customer.php" class="btn btn-success">+ Add New Customer</a>
+                <a href="add_hs_code.php" class="btn btn-success">+ Add New HS Code</a>
                 <a href="index.php" class="btn btn-outline-secondary">← Back to Invoices</a>
             </div>
         </div>
@@ -82,42 +82,30 @@ $customers = $stmt->fetchAll();
                         <thead>
                             <tr>
                                 <th>ID</th>
-                                <th>Code</th>
-                                <th>Name</th>
-                                <th>CNIC</th>
-                                <th>Email</th>
-                                <th>Phone</th>
-                                <th>City</th>
-                                <th>STRN</th>
-                                <th>NTN</th>
+                                <th>HS Code</th>
+                                <!-- <th>Name</th> -->
                                 <th class="text-center">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php
                             $i = 1; // Start numbering from 1
-                            foreach ($customers as $c):
+                            foreach ($hs_codes as $c):
                             ?>
                                 <tr>
                                     <td><?= $i++ ?></td>
-                                    <td><?= htmlspecialchars($c['code']) ?></td>
-                                    <td><?= htmlspecialchars($c['name']) ?></td>
-                                    <td><?= htmlspecialchars($c['cnic']) ?></td>
-                                    <td><?= htmlspecialchars($c['email']) ?></td>
-                                    <td><?= htmlspecialchars($c['phone']) ?></td>
-                                    <td><?= htmlspecialchars($c['city']) ?></td>
-                                    <td><?= htmlspecialchars($c['strn']) ?></td>
-                                    <td><?= htmlspecialchars($c['ntn']) ?></td>
+                                    <td><?= htmlspecialchars($c['hs_code']) ?></td>
+                                    <!-- <td><?= htmlspecialchars($c['name']) ?></td> -->
                                     <td class="text-center action-buttons">
-                                        <a href="edit_customer.php?id=<?= $c['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
-                                        <a href="delete_customer.php?id=<?= $c['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this customer?')">Delete</a>
+                                        <a href="edit_hs_code.php?id=<?= $c['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
+                                        <a href="delete_hs_code.php?id=<?= $c['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this HS code?')">Delete</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
 
-                            <?php if (empty($customers)): ?>
+                            <?php if (empty($hs_codes)): ?>
                                 <tr>
-                                    <td colspan="10" class="text-center text-muted py-4">No customers found.</td>
+                                    <td colspan="10" class="text-center text-muted py-4">No HS Code found.</td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>
