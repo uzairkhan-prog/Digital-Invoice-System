@@ -70,6 +70,19 @@ foreach ($invoices as $inv) {
             background: #eef3f8;
             font-family: 'Segoe UI', sans-serif;
             font-size: 14px;
+            animation: fadeInBody 0.6s ease-in-out;
+        }
+
+        @keyframes fadeInBody {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .invoice-header {
@@ -82,18 +95,47 @@ foreach ($invoices as $inv) {
             background: white;
             border-radius: 12px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            animation: slideDown 0.5s ease-in-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .invoice-header h2 {
             font-weight: 700;
-            color: #0d6efd;
+            background: #041a2a;
+            border-radius: 10px;
             margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        .logo {
+            width: 300px;
+            height: auto;
         }
 
         .invoice-header .btn {
             border-radius: 50px;
             padding: 6px 16px;
             font-weight: 500;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .invoice-header .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .card {
@@ -102,10 +144,23 @@ foreach ($invoices as $inv) {
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             overflow: hidden;
             background: #fff;
+            animation: fadeUp 0.5s ease-in-out;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .card-header {
-            background: linear-gradient(90deg, #0d6efd, #4dabf7);
+            background: linear-gradient(90deg, #041a2a, #4dabf7);
             color: white;
             font-weight: 600;
             font-size: 15px;
@@ -120,9 +175,12 @@ foreach ($invoices as $inv) {
             border-bottom: 2px solid #dee2e6;
         }
 
+        .table tbody tr {
+            transition: background 0.2s ease-in-out;
+        }
+
         .table tbody tr:hover {
             background: #f1f5ff;
-            transition: background 0.2s ease-in-out;
         }
 
         .table td {
@@ -135,14 +193,14 @@ foreach ($invoices as $inv) {
             background: #f8f9fa;
         }
 
-        .form-control,
-        .btn {
-            box-shadow: none !important;
-        }
-
         .pagination .page-link {
             border-radius: 50px;
             padding: 6px 12px;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-link:hover {
+            transform: scale(1.1);
         }
 
         .pagination .active .page-link {
@@ -171,7 +229,10 @@ foreach ($invoices as $inv) {
 <body>
     <div class="container py-4">
         <div class="invoice-header mb-4">
-            <h2>📋 Invoice Management</h2>
+            <h2>
+                <img src="https://vibrantengineering.pk/wp-content/uploads/2023/08/check-logo.png" alt="Logo" class="logo">
+            </h2>
+            <h3>Invoice Management</h3>
             <div class="d-flex flex-wrap gap-2">
                 <a href="add_invoice.php" class="btn btn-success">+ Add Invoice</a>
                 <a href="add_customer.php" class="btn btn-outline-secondary">+ Add Customer</a>
@@ -180,8 +241,8 @@ foreach ($invoices as $inv) {
             </div>
         </div>
 
-        <form method="get" class="row gy-2 gx-2 align-items-end mb-4 bg-white p-3 rounded shadow-sm">
-            <div class="col-md-3">
+        <form method="get" class="row gy-2 gx-2 align-items-end mb-4 bg-white p-3 rounded shadow-sm" style="justify-content: space-between; animation: fadeUp 0.5s ease-in-out;">
+            <div class="col-md-6">
                 <label>Search</label>
                 <input type="text" name="search" class="form-control" value="<?= htmlspecialchars($search) ?>" placeholder="Serial or Customer" />
             </div>
