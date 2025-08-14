@@ -10,6 +10,7 @@ A simple PHP-based invoice management system that allows you to create, edit, vi
 - **Export to PDF** – Download a colorful, full-page PDF version of the invoice.
 - **Amount in Words** – Automatically converts the total amount to words.
 - **Customer Management** – Add and manage customer information.
+- **HS Code Management** – Add and manage HS Code information.
 - **Responsive Design** – Works on desktop and mobile screens.
 - **Colorful Styling in PDF** – Exported PDFs retain the HTML/CSS colors and styling.
 - **JavaScript Print/Export Support** – For quick browser printing or exporting.
