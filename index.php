@@ -57,7 +57,6 @@ foreach ($invoices as $inv) {
     $grand_total += $inv['grand_total'];
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -68,7 +67,7 @@ foreach ($invoices as $inv) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
         body {
-            background: #f4f8fb;
+            background: #eef3f8;
             font-family: 'Segoe UI', sans-serif;
             font-size: 14px;
         }
@@ -78,61 +77,101 @@ foreach ($invoices as $inv) {
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
+            gap: 10px;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
-        .btn {
+        .invoice-header h2 {
+            font-weight: 700;
+            color: #0d6efd;
+            margin: 0;
+        }
+
+        .invoice-header .btn {
             border-radius: 50px;
-        }
-
-        .table th,
-        .table td {
-            vertical-align: middle !important;
+            padding: 6px 16px;
+            font-weight: 500;
         }
 
         .card {
-            border-radius: 1rem;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.05);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             overflow: hidden;
-            background: #ffffff;
-            padding: 20px;
+            background: #fff;
+        }
+
+        .card-header {
+            background: linear-gradient(90deg, #0d6efd, #4dabf7);
+            color: white;
+            font-weight: 600;
+            font-size: 15px;
+            padding: 12px 20px;
         }
 
         .table thead th {
-            background: linear-gradient(90deg, #b2d8ff, #e0f0ff);
-            color: #333;
+            background: #f7f9fc;
+            color: #495057;
+            font-weight: 600;
+            padding: 12px;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .table tbody tr:hover {
+            background: #f1f5ff;
+            transition: background 0.2s ease-in-out;
+        }
+
+        .table td {
+            padding: 10px;
+            vertical-align: middle !important;
         }
 
         .totals-row td {
             font-weight: bold;
-            background-color: #f9f9f9;
+            background: #f8f9fa;
         }
 
         .form-control,
         .btn {
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: none !important;
         }
 
         .pagination .page-link {
             border-radius: 50px;
+            padding: 6px 12px;
         }
 
-        .form-inline input {
-            max-width: 180px;
+        .pagination .active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
         }
 
-        .utilities-buttons {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        form label {
+            font-weight: 500;
+            font-size: 13px;
+            margin-bottom: 3px;
+        }
+
+        form input,
+        form button {
+            font-size: 13px;
+        }
+
+        .table-responsive {
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
         }
     </style>
 </head>
 
 <body>
-
-    <div class="container py-5">
+    <div class="container py-4">
         <div class="invoice-header mb-4">
-            <h2 class="fw-bold mb-3">📋 Vibrant Engineering Invoice Management</h2>
+            <h2>📋 Invoice Management</h2>
             <div class="d-flex flex-wrap gap-2">
                 <a href="add_invoice.php" class="btn btn-success">+ Add Invoice</a>
                 <a href="add_customer.php" class="btn btn-outline-secondary">+ Add Customer</a>
@@ -141,9 +180,10 @@ foreach ($invoices as $inv) {
             </div>
         </div>
 
-        <form method="get" class="row gy-2 gx-2 justify-content-center align-items-end mb-4">
+        <form method="get" class="row gy-2 gx-2 align-items-end mb-4 bg-white p-3 rounded shadow-sm">
             <div class="col-md-3">
-                <input type="text" name="search" class="form-control" value="<?= htmlspecialchars($search) ?>" placeholder="🔍 Search Serial or Customer" />
+                <label>Search</label>
+                <input type="text" name="search" class="form-control" value="<?= htmlspecialchars($search) ?>" placeholder="Serial or Customer" />
             </div>
             <div class="col-md-2">
                 <label>From</label>
@@ -162,55 +202,51 @@ foreach ($invoices as $inv) {
         </form>
 
         <div class="card">
-            <div class="card-header bg-light text-dark fw-semibold">Invoice List</div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>#ID</th>
-                                <th>Serial No</th>
-                                <th>Date</th>
-                                <th>Customer</th>
-                                <th>Gross Total</th>
-                                <th>Grand Total</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if ($invoices): ?>
-                                <?php $rowNum = 1; // Start counter
-                                ?>
-                                <?php foreach ($invoices as $inv): ?>
-                                    <tr>
-                                        <td><?= $rowNum++ ?></td> <!-- Sequential number -->
-                                        <td><?= htmlspecialchars($inv['serial_no']) ?></td>
-                                        <td><?= htmlspecialchars($inv['date']) ?></td>
-                                        <td><?= htmlspecialchars($inv['customer_name']) ?></td>
-                                        <td>Rs. <?= number_format($inv['gross_total'], 2) ?></td>
-                                        <td>Rs. <?= number_format($inv['grand_total'], 2) ?></td>
-                                        <td class="text-center">
-                                            <a href="view_invoice.php?id=<?= $inv['id'] ?>" class="btn btn-sm btn-success">Invoice</a>
-                                            <a href="edit_invoice.php?id=<?= $inv['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
-                                            <a href="delete_invoice.php?id=<?= $inv['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this invoice?')">Delete</a>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                                <tr class="totals-row">
-                                    <td colspan="4" class="text-end">Total</td>
-                                    <td>Rs. <?= number_format($gross_total, 2) ?></td>
-                                    <td>Rs. <?= number_format($grand_total, 2) ?></td>
-                                    <td></td>
-                                </tr>
-                            <?php else: ?>
+            <div class="card-header">Invoice List</div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>#ID</th>
+                            <th>Serial No</th>
+                            <th>Date</th>
+                            <th>Customer</th>
+                            <th>Gross Total</th>
+                            <th>Grand Total</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if ($invoices): ?>
+                            <?php $rowNum = 1; ?>
+                            <?php foreach ($invoices as $inv): ?>
                                 <tr>
-                                    <td colspan="7" class="text-center text-muted py-4">No invoices found.</td>
+                                    <td><?= $rowNum++ ?></td>
+                                    <td><?= htmlspecialchars($inv['serial_no']) ?></td>
+                                    <td><?= htmlspecialchars($inv['date']) ?></td>
+                                    <td><?= htmlspecialchars($inv['customer_name']) ?></td>
+                                    <td>Rs. <?= number_format($inv['gross_total'], 2) ?></td>
+                                    <td>Rs. <?= number_format($inv['grand_total'], 2) ?></td>
+                                    <td class="text-center">
+                                        <a href="view_invoice.php?id=<?= $inv['id'] ?>" class="btn btn-sm btn-success">Invoice</a>
+                                        <a href="edit_invoice.php?id=<?= $inv['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
+                                        <a href="delete_invoice.php?id=<?= $inv['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Delete this invoice?')">Delete</a>
+                                    </td>
                                 </tr>
-                            <?php endif; ?>
-                        </tbody>
-
-                    </table>
-                </div>
+                            <?php endforeach; ?>
+                            <tr class="totals-row">
+                                <td colspan="4" class="text-end">Total</td>
+                                <td>Rs. <?= number_format($gross_total, 2) ?></td>
+                                <td>Rs. <?= number_format($grand_total, 2) ?></td>
+                                <td></td>
+                            </tr>
+                        <?php else: ?>
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">No invoices found.</td>
+                            </tr>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -228,8 +264,6 @@ foreach ($invoices as $inv) {
             </nav>
         <?php endif; ?>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

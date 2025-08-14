@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="mt-4">
                         <button type="submit" class="btn btn-success px-4">Save HS Code</button>
-                        <a href="hs_codes.php" class="btn btn-secondary ms-2">Back to HS Codes</a>
+                        <a href="hs_code.php" class="btn btn-secondary ms-2">Back to HS Codes</a>
                     </div>
                 </form>
             </div>

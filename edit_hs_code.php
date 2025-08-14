@@ -13,7 +13,7 @@ $stmt->execute([$id]);
 $hs_code = $stmt->fetch();
 
 if (!$hs_code) {
-    header("Location: hs_codes.php");
+    header("Location: hs_code.php");
     exit;
 }
 
@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="mt-4">
                         <button type="submit" class="btn btn-success px-4">Update HS Code</button>
-                        <a href="hs_codes.php" class="btn btn-secondary ms-2">Back to HS Code</a>
+                        <a href="hs_code.php" class="btn btn-secondary ms-2">Back to HS Code</a>
                     </div>
                 </form>
             </div>

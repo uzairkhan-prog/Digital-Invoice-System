@@ -33,29 +33,68 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <style>
+        /* ===== Base Page Styling ===== */
         body {
             background-color: #f4f6f9;
             padding-top: 40px;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            color: #333;
+            line-height: 1.6;
         }
 
+        /* ===== Form Container ===== */
         .form-section {
             background: white;
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid #0d6efd;
         }
 
-        .table thead th {
-            vertical-align: middle;
-            text-align: center;
-            background: linear-gradient(90deg, #b2d8ff, #e0f0ff);
-            color: #333;
+        .form-section h3 {
+            font-weight: 700;
+            font-size: 1.4rem;
+            color: #0d6efd;
+            border-bottom: 2px solid #f1f3f5;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
         }
 
-        .table td,
-        .table th {
-            vertical-align: middle;
-            text-align: center;
+        /* ===== Form Labels ===== */
+        .form-label {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        /* ===== Inputs & Selects ===== */
+        input.form-control,
+        select.form-select {
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            font-size: 0.9rem;
+            padding: 8px 10px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        input.form-control:focus,
+        select.form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.15);
+        }
+
+        input[type="text"]:read-only,
+        input[type="number"]:read-only {
+            background-color: #f8f9fa;
+            color: #555;
+        }
+
+        /* ===== Buttons ===== */
+        .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 8px 16px;
+            transition: all 0.2s ease-in-out;
         }
 
         .btn-success,
@@ -64,44 +103,141 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
             min-width: 120px;
         }
 
+        .btn-outline-secondary {
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd;
+        }
+
+        /* ===== Table Styling ===== */
+        #itemsTable {
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.88rem;
+            background: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        #itemsTable thead th {
+            background: linear-gradient(90deg, #b2d8ff, #e0f0ff);
+            color: #000000;
+            font-weight: 600;
+            /* letter-spacing: 0.5px; */
+            border-bottom: 2px solid #496d92;
+            text-align: center;
+        }
+
+        #itemsTable tbody tr {
+            transition: background-color 0.15s ease-in-out;
+        }
+
+        #itemsTable tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        #itemsTable td {
+            padding: 10px;
+            vertical-align: middle;
+            border-color: #e9ecef;
+            text-align: center;
+        }
+
+        #itemsTable input.form-control,
+        #itemsTable select.form-select {
+            border-radius: 6px;
+            border: 1px solid #ced4da;
+            font-size: 0.85rem;
+            padding: 6px 8px;
+        }
+
+        #itemsTable input.form-control:focus,
+        #itemsTable select.form-select:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+        }
+
+        /* ===== Add Row Button ===== */
+        #addRowBtn {
+            margin-top: 15px;
+            margin-bottom: 20px;
+            border-radius: 20px;
+            padding: 6px 18px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+        }
+
+        #addRowBtn:hover {
+            background-color: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd;
+        }
+
+        /* ===== Remove Button ===== */
+        .removeRow {
+            border-radius: 50%;
+            padding: 3px 8px;
+            font-size: 12px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .removeRow:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        /* ===== Totals Section ===== */
+        #totalAmount,
+        #grandTotal {
+            font-weight: bold;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+
+        /* ===== Modal Styling ===== */
         .modal-header {
             background-color: #0d6efd;
             color: white;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
         }
 
         .modal-content {
             border-radius: 10px;
         }
 
-        #addRowBtn {
-            margin-top: 15px;
-            margin-bottom: 20px;
+        .modal-footer .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
         }
 
-        .form-label {
-            font-weight: 600;
+        .modal-footer .btn-primary:hover {
+            background-color: #0b5ed7;
         }
 
-        input[type="text"]:read-only,
-        input[type="number"]:read-only {
-            background-color: #e9ecef;
+        /* ===== Table Container ===== */
+        .table-responsive {
+            margin-top: 20px;
         }
     </style>
 </head>
 
 <body>
-
     <div class="container">
         <div class="form-section">
             <h3 class="mb-4">🧾 Create Invoice</h3>
 
-            <!-- Invoice Header Form -->
             <form action="save_invoice.php" method="POST" id="invoiceForm">
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label for="serial_no" class="form-label">Serial No</label>
-                        <input type="text" class="form-control" id="serial_no" name="serial_no"
-                            value="<?= $serialNo ?>" readonly required>
+                        <input type="text" class="form-control" id="serial_no" name="serial_no" value="<?= $serialNo ?>" readonly required>
                     </div>
                     <div class="col-md-3">
                         <label for="date" class="form-label">Date</label>
@@ -148,7 +284,6 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
                     <table class="table table-bordered align-middle" id="itemsTable">
                         <thead>
                             <tr>
-                                <!-- <th>Item Code</th> -->
                                 <th>H.S Code</th>
                                 <th>Item Name</th>
                                 <th>Qty</th>
@@ -157,6 +292,8 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
                                 <th>Disc %</th>
                                 <th>Discount</th>
                                 <th>Excl Tax Amt</th>
+                                <th>Tax %</th>
+                                <th>Inc Tax Amt</th>
                                 <th>Amount</th>
                                 <th>Action</th>
                             </tr>
@@ -180,6 +317,8 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
                                 <td><input type="number" step="0.01" min="0" max="100" name="disc_perc[]" class="form-control discPerc"></td>
                                 <td><input type="number" step="0.01" min="0" name="discount[]" class="form-control discount" readonly></td>
                                 <td><input type="number" step="0.01" min="0" name="excl_tax_amt[]" class="form-control exclTax" readonly></td>
+                                <td><input type="number" step="0.01" min="0" max="100" name="tax_perc[]" class="form-control taxPerc" value="18"></td>
+                                <td><input type="number" step="0.01" min="0" name="tax_amt[]" class="form-control taxAmt" readonly></td>
                                 <td><input type="number" step="0.01" min="0" name="amount[]" class="form-control amount" readonly></td>
                                 <td><button type="button" class="btn btn-sm btn-danger removeRow">X</button></td>
                             </tr>
@@ -190,28 +329,19 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
                 <button type="button" class="btn btn-outline-secondary" id="addRowBtn">+ Add Row</button>
 
                 <!-- Summary Fields -->
-                <div class="row mt-4 g-3">
-                    <div class="col-md-4">
-                        <label for="discount" class="form-label">Discount (%)</label>
-                        <input type="number" name="discount" id="discount" class="form-control" value="0" step="0.01" min="0" max="100">
+                <div class="row g-3">
+                    <div class="col-md-8">
                     </div>
-                    <div class="col-md-4">
-                        <label for="tax" class="form-label">Tax (%)</label>
-                        <input type="number" name="tax" id="tax" class="form-control" value="18" step="0.01" min="0" max="100">
-                    </div>
-                    <div class="col-md-4">
-                        <label for="totalAmount" class="form-label"><strong>Gross Total:</strong></label>
+                    <div class="col-md-2">
+                        <label for="totalAmount" class="form-label"><strong>Gross Total (Excl. Tax):</strong></label>
                         <input type="text" id="totalAmount" class="form-control" readonly>
                     </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-md-4 offset-md-8">
+                    <div class="col-md-2">
                         <label for="grandTotal" class="form-label"><strong>Grand Total (Incl. Tax):</strong></label>
                         <input type="text" id="grandTotal" class="form-control" readonly>
                     </div>
                 </div>
 
-                <!-- Save Button -->
                 <div class="text-end">
                     <a href="index.php" class="btn btn-secondary mt-4 px-4">Back</a>
                     <button type="submit" class="btn btn-success mt-4 px-4">💾 Save Invoice</button>
@@ -249,20 +379,14 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
         </div>
     </div>
 
-    <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
 
     <script>
-        // Show bootstrap modal
         const customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
+        const hsCodes = <?php echo json_encode(array_column($hs_codes, 'hs_code')); ?>;
 
-        document.getElementById('addCustomerBtn').addEventListener('click', () => {
-            customerModal.show();
-        });
+        document.getElementById('addCustomerBtn').addEventListener('click', () => customerModal.show());
 
-        // Handle customer form submit via AJAX
         document.getElementById('customerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             fetch('save_customer.php', {
@@ -272,16 +396,12 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        // Hide modal and reload customers dropdown
                         customerModal.hide();
                         loadCustomers();
-                    } else {
-                        alert(data.message);
-                    }
+                    } else alert(data.message);
                 });
         });
 
-        // Reload customer dropdown options
         function loadCustomers() {
             fetch('get_customers.php')
                 .then(res => res.json())
@@ -294,91 +414,83 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
                 });
         }
 
-        // Invoice Items logic
-        const hsCodes = <?php echo json_encode(array_column($hs_codes, 'hs_code')); ?>;
         document.getElementById('addRowBtn').addEventListener('click', () => {
             const tbody = document.querySelector('#itemsTable tbody');
             const newRow = document.createElement('tr');
-            // Build HS Code options
             let hsOptions = '<option disabled selected>Select</option>';
-            hsCodes.forEach(code => {
-                hsOptions += `<option value="${code}">${code}</option>`;
-            });
+            hsCodes.forEach(code => hsOptions += `<option value="${code}">${code}</option>`);
             newRow.innerHTML = `
-              <td style="width: 150px;"><select class="form-select" name="hs_code[]" required>${hsOptions}</select></td>
-              <td><input type="text" name="item_name[]" class="form-control"></td>
-              <td><input type="number" step="1" min="0" name="qty[]" class="form-control qty"></td>
-              <td><input type="text" name="unit[]" class="form-control"></td>
-              <td><input type="number" step="0.01" min="0" name="rate[]" class="form-control rate"></td>
-              <td><input type="number" step="0.01" min="0" max="100" name="disc_perc[]" class="form-control discPerc"></td>
-              <td><input type="number" step="0.01" min="0" name="discount[]" class="form-control discount" readonly></td>
-              <td><input type="number" step="0.01" min="0" name="excl_tax_amt[]" class="form-control exclTax" readonly></td>
-              <td><input type="number" step="0.01" min="0" name="amount[]" class="form-control amount" readonly></td>
-              <td><button type="button" class="btn btn-danger btn-sm removeRow">X</button></td>
+                <td><select class="form-select" name="hs_code[]" required>${hsOptions}</select></td>
+                <td><input type="text" name="item_name[]" class="form-control"></td>
+                <td><input type="number" step="1" min="0" name="qty[]" class="form-control qty"></td>
+                <td><input type="text" name="unit[]" class="form-control"></td>
+                <td><input type="number" step="0.01" min="0" name="rate[]" class="form-control rate"></td>
+                <td><input type="number" step="0.01" min="0" max="100" name="disc_perc[]" class="form-control discPerc"></td>
+                <td><input type="number" step="0.01" min="0" name="discount[]" class="form-control discount" readonly></td>
+                <td><input type="number" step="0.01" min="0" name="excl_tax_amt[]" class="form-control exclTax" readonly></td>
+                <td><input type="number" step="0.01" min="0" max="100" name="tax_perc[]" class="form-control taxPerc" value="18"></td>
+                <td><input type="number" step="0.01" min="0" name="tax_amt[]" class="form-control taxAmt" readonly></td>
+                <td><input type="number" step="0.01" min="0" name="amount[]" class="form-control amount" readonly></td>
+                <td><button type="button" class="btn btn-sm btn-danger removeRow">X</button></td>
             `;
             tbody.appendChild(newRow);
             bindEvents();
         });
 
-        // Remove Row & recalc totals
         function bindEvents() {
             document.querySelectorAll('.removeRow').forEach(btn => {
                 btn.onclick = () => {
                     const tbody = document.querySelector('#itemsTable tbody');
-                    if (tbody.querySelectorAll('tr').length > 1) {
-                        btn.closest('tr').remove();
-                        updateTotals();
-                    } else {
-                        alert("You must have at least one row in the invoice.");
-                    }
+                    if (tbody.querySelectorAll('tr').length > 1) btn.closest('tr').remove();
+                    else alert("You must have at least one row in the invoice.");
+                    updateTotals();
                 };
             });
 
-            // Calculate amounts on input
             document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
                 const qty = row.querySelector('.qty');
                 const rate = row.querySelector('.rate');
                 const discPerc = row.querySelector('.discPerc');
-                if (qty && rate && discPerc) {
-                    [qty, rate, discPerc].forEach(el => {
-                        el.oninput = () => {
-                            const q = parseFloat(qty.value) || 0;
-                            const r = parseFloat(rate.value) || 0;
-                            const dP = parseFloat(discPerc.value) || 0;
-                            const amt = q * r;
-                            const disc = amt * (dP / 100);
-                            const exTax = amt - disc;
-                            row.querySelector('.amount').value = amt.toFixed(2);
-                            row.querySelector('.discount').value = disc.toFixed(2);
-                            row.querySelector('.exclTax').value = exTax.toFixed(2);
-                            updateTotals();
-                        };
-                    });
-                }
+                const taxPerc = row.querySelector('.taxPerc');
+
+                [qty, rate, discPerc, taxPerc].forEach(el => {
+                    el.oninput = () => {
+                        const q = parseFloat(qty.value) || 0;
+                        const r = parseFloat(rate.value) || 0;
+                        const dP = parseFloat(discPerc.value) || 0;
+                        const tP = parseFloat(taxPerc.value) || 0;
+
+                        const amt = q * r;
+                        const disc = amt * (dP / 100);
+                        const exTax = amt - disc;
+                        const taxAmt = exTax * (tP / 100);
+                        const totalAmt = exTax + taxAmt;
+
+                        row.querySelector('.amount').value = totalAmt.toFixed(2);
+                        row.querySelector('.discount').value = disc.toFixed(2);
+                        row.querySelector('.exclTax').value = exTax.toFixed(2);
+                        row.querySelector('.taxAmt').value = taxAmt.toFixed(2);
+
+                        updateTotals();
+                    };
+                });
             });
         }
 
         function updateTotals() {
-            let total = 0;
+            let totalExcl = 0;
+            let grandTotal = 0;
             document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
-                total += parseFloat(row.querySelector('.exclTax').value) || 0;
+                totalExcl += parseFloat(row.querySelector('.exclTax').value) || 0;
+                grandTotal += parseFloat(row.querySelector('.amount').value) || 0;
             });
-            document.getElementById('totalAmount').value = total.toFixed(2);
-
-            const discountPct = parseFloat(document.getElementById('discount').value) || 0;
-            const taxPct = parseFloat(document.getElementById('tax').value) || 0;
-            let afterDisc = total - (total * discountPct / 100);
-            let grand = afterDisc + (afterDisc * taxPct / 100);
-            document.getElementById('grandTotal').value = grand.toFixed(2);
+            document.getElementById('totalAmount').value = totalExcl.toFixed(2);
+            document.getElementById('grandTotal').value = grandTotal.toFixed(2);
         }
-
-        document.getElementById('discount').addEventListener('input', updateTotals);
-        document.getElementById('tax').addEventListener('input', updateTotals);
 
         bindEvents();
         updateTotals();
     </script>
-
 </body>
 
 </html>

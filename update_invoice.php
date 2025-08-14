@@ -11,7 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fbr_invoice_no = $_POST['fbr_invoice_no'];
     $po_no = $_POST['po_no'];
     $terms_of_payment = $_POST['terms_of_payment'];
-    $created_at = $_POST['created_at'];
     $discount = floatval($_POST['discount']);
     $tax = floatval($_POST['tax']);
 
@@ -21,20 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $pdo->beginTransaction();
     try {
-        $stmt = $pdo->prepare("UPDATE invoices SET 
-            serial_no = ?, 
-            date = ?, 
-            invoice_type = ?, 
-            scenario_id = ?, 
-            customer_id = ?, 
-            discount = ?, 
-            tax = ?, 
-            gross_total = ?, 
-            grand_total = ?, 
-            fbr_invoice_no = ?, 
-            po_no = ?, 
-            terms_of_payment = ?, 
-            created_at = ?
+        // Update invoice
+        $stmt = $pdo->prepare("UPDATE invoices SET
+            serial_no = ?, date = ?, invoice_type = ?, scenario_id = ?, customer_id = ?,
+            discount = ?, tax = ?, gross_total = ?, grand_total = ?, fbr_invoice_no = ?, po_no = ?, terms_of_payment = ?
             WHERE id = ?");
 
         $stmt->execute([
@@ -50,32 +39,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fbr_invoice_no,
             $po_no,
             $terms_of_payment,
-            $created_at,
             $id
         ]);
 
+        // Delete old items
         $pdo->prepare("DELETE FROM invoice_items WHERE invoice_id = ?")->execute([$id]);
 
-        $item_stmt = $pdo->prepare("INSERT INTO invoice_items 
-                (invoice_id, item_code, hs_code, item_name, qty, unit, rate, disc_perc, discount, excl_tax_amt, amount) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        // Insert updated items
+        $item_stmt = $pdo->prepare("INSERT INTO invoice_items
+            (invoice_id, hs_code, item_name, qty, unit, rate, disc_perc, discount, excl_tax_amt, tax_perc, tax_amt, amount)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
-        foreach ($_POST['hs_code'] as $i => $hs_code) {
-            $item_code = isset($_POST['item_code'][$i]) && trim($_POST['item_code'][$i]) !== ''
-                ? $_POST['item_code'][$i]
-                : 'default';
+        foreach ($_POST['item_name'] as $i => $name) {
+            if (trim($name) === '') continue;
 
             $item_stmt->execute([
                 $id,
-                $item_code,
-                $hs_code,
-                $_POST['item_name'][$i],
+                $_POST['hs_code'][$i],
+                $name,
                 $_POST['qty'][$i],
                 $_POST['unit'][$i],
                 $_POST['rate'][$i],
                 $_POST['disc_perc'][$i],
                 $_POST['discount'][$i],
                 $_POST['excl_tax_amt'][$i],
+                $_POST['tax_perc'][$i],
+                $_POST['tax_amt'][$i],
                 $_POST['amount'][$i]
             ]);
         }
