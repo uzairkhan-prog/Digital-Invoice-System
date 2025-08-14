@@ -56,12 +56,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $pdo->prepare("DELETE FROM invoice_items WHERE invoice_id = ?")->execute([$id]);
 
-        $item_stmt = $pdo->prepare("INSERT INTO invoice_items (invoice_id, item_code, hs_code, item_name, qty, unit, rate, disc_perc, discount, excl_tax_amt, amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        foreach ($_POST['item_code'] as $i => $code) {
+        $item_stmt = $pdo->prepare("INSERT INTO invoice_items 
+                (invoice_id, item_code, hs_code, item_name, qty, unit, rate, disc_perc, discount, excl_tax_amt, amount) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+
+        foreach ($_POST['hs_code'] as $i => $hs_code) {
+            $item_code = isset($_POST['item_code'][$i]) && trim($_POST['item_code'][$i]) !== ''
+                ? $_POST['item_code'][$i]
+                : 'default';
+
             $item_stmt->execute([
                 $id,
-                $_POST['item_code'][$i],
-                $_POST['hs_code'][$i],
+                $item_code,
+                $hs_code,
                 $_POST['item_name'][$i],
                 $_POST['qty'][$i],
                 $_POST['unit'][$i],

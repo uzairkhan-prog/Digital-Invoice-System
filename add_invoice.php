@@ -5,6 +5,10 @@ require 'db.php';
 $stmt = $pdo->query("SELECT id, code, name FROM customers ORDER BY name");
 $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Fetch HS Code for selection dropdown
+$stmt = $pdo->query("SELECT id, hs_code FROM hs_codes ORDER BY id");
+$hs_codes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 // Fetch last serial number from invoices table
 $stmt = $pdo->query("SELECT serial_no FROM invoices ORDER BY id DESC LIMIT 1");
 $lastSerial = $stmt->fetchColumn();
@@ -159,8 +163,16 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
                         </thead>
                         <tbody>
                             <tr>
-                                <!-- <td><input type="text" name="item_code[]" class="form-control"></td> -->
-                                <td><input type="text" name="hs_code[]" class="form-control"></td>
+                                <td style="width: 150px;">
+                                    <select class="form-select" name="hs_code[]" required>
+                                        <option disabled selected>Select</option>
+                                        <?php foreach ($hs_codes as $c): ?>
+                                            <option value="<?= htmlspecialchars($c['hs_code']) ?>">
+                                                <?= htmlspecialchars($c['hs_code']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </td>
                                 <td><input type="text" name="item_name[]" class="form-control"></td>
                                 <td><input type="number" step="1" min="0" name="qty[]" class="form-control qty"></td>
                                 <td><input type="text" name="unit[]" class="form-control"></td>
@@ -283,12 +295,17 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
         }
 
         // Invoice Items logic
+        const hsCodes = <?php echo json_encode(array_column($hs_codes, 'hs_code')); ?>;
         document.getElementById('addRowBtn').addEventListener('click', () => {
             const tbody = document.querySelector('#itemsTable tbody');
             const newRow = document.createElement('tr');
+            // Build HS Code options
+            let hsOptions = '<option disabled selected>Select</option>';
+            hsCodes.forEach(code => {
+                hsOptions += `<option value="${code}">${code}</option>`;
+            });
             newRow.innerHTML = `
-              <td><input type="text" name="item_code[]" class="form-control"></td>
-              <td><input type="text" name="hs_code[]" class="form-control"></td>
+              <td style="width: 150px;"><select class="form-select" name="hs_code[]" required>${hsOptions}</select></td>
               <td><input type="text" name="item_name[]" class="form-control"></td>
               <td><input type="number" step="1" min="0" name="qty[]" class="form-control qty"></td>
               <td><input type="text" name="unit[]" class="form-control"></td>
@@ -307,8 +324,13 @@ $serialNo = str_pad($nextSerial, 3, '0', STR_PAD_LEFT);
         function bindEvents() {
             document.querySelectorAll('.removeRow').forEach(btn => {
                 btn.onclick = () => {
-                    btn.closest('tr').remove();
-                    updateTotals();
+                    const tbody = document.querySelector('#itemsTable tbody');
+                    if (tbody.querySelectorAll('tr').length > 1) {
+                        btn.closest('tr').remove();
+                        updateTotals();
+                    } else {
+                        alert("You must have at least one row in the invoice.");
+                    }
                 };
             });
 

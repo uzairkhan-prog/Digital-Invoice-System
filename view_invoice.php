@@ -279,7 +279,7 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                 <div class="col-md-7">
                     <h6>Bill To:</h6>
                     <p><strong>Customer:</strong> <?= htmlspecialchars($invoice['customer_name']) ?></p>
-                    <p><strong>Province:</strong> <?= nl2br(htmlspecialchars($invoice['customer_city'])) ?></p>
+                    <!-- <p><strong>Province:</strong> <?= nl2br(htmlspecialchars($invoice['customer_city'])) ?></p> -->
                     <p><strong>Address:</strong> <?= nl2br(htmlspecialchars($invoice['customer_address'])) ?></p>
                     <p><strong>Phone:</strong> <?= htmlspecialchars($invoice['customer_phone']) ?></p>
                     <p><strong>Email:</strong> <?= htmlspecialchars($invoice['customer_email']) ?></p>
@@ -299,7 +299,7 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Item Code</th>
+                            <!-- <th>Item Code</th> -->
                             <th>HS Code</th>
                             <th>Item Name</th>
                             <th>Qty</th>
@@ -315,7 +315,7 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                         <?php foreach ($items as $i => $item): ?>
                             <tr>
                                 <td><?= $i + 1 ?></td>
-                                <td><?= htmlspecialchars($item['item_code']) ?></td>
+                                <!-- <td><?= htmlspecialchars($item['item_code']) ?></td> -->
                                 <td><?= htmlspecialchars($item['hs_code']) ?></td>
                                 <td><?= htmlspecialchars($item['item_name']) ?></td>
                                 <td><?= nf($item['qty'], 0) ?></td>

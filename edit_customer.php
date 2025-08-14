@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'];
     $phone = $_POST['phone'] ?? '';
     $address = $_POST['address'] ?? '';
-    $city = $_POST['city'] ?? '';
+    $city = $_POST['city'] ?? 'Karachi, Pakistan';
     $strn = $_POST['strn'] ?? '';
     $ntn = $_POST['ntn'] ?? '';
 
@@ -119,10 +119,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <label for="address" class="form-label">Address</label>
                             <input type="text" id="address" name="address" class="form-control" value="<?= htmlspecialchars($customer['address']) ?>">
                         </div>
-                        <div class="col-md-4">
+                        <!-- <div class="col-md-4">
                             <label for="city" class="form-label">Province</label>
                             <input type="text" id="city" name="city" class="form-control" value="<?= htmlspecialchars($customer['city']) ?>">
-                        </div>
+                        </div> -->
                         <div class="col-md-4">
                             <label for="cnic" class="form-label">CNIC <span class="text-danger">*</span></label>
                             <input type="text" id="cnic" name="cnic" class="form-control" required value="<?= htmlspecialchars($customer['cnic']) ?>">

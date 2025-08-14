@@ -19,10 +19,13 @@ $itemStmt = $pdo->prepare("SELECT * FROM invoice_items WHERE invoice_id = ?");
 $itemStmt->execute([$id]);
 $items = $itemStmt->fetchAll();
 
-// $customers = $pdo->query("SELECT id, name FROM customers ORDER BY name")->fetchAll();
 // Fetch customers for selection dropdown
 $stmt = $pdo->query("SELECT id, code, name FROM customers ORDER BY name");
 $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch HS Code for selection dropdown
+$stmt = $pdo->query("SELECT id, hs_code FROM hs_codes ORDER BY id");
+$hs_codes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -99,7 +102,7 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label">Serial No</label>
-                        <input name="serial_no" class="form-control" value="<?= htmlspecialchars($invoice['serial_no']) ?>" required>
+                        <input type="text" name="serial_no" class="form-control" value="<?= htmlspecialchars($invoice['serial_no']) ?>" readonly required>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label">Date</label>
@@ -145,7 +148,6 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <table class="table table-bordered" id="itemsTable">
                         <thead class="table-primary">
                             <tr>
-                                <th>Item Code</th>
                                 <th>H.S Code</th>
                                 <th>Item Name</th>
                                 <th>Qty</th>
@@ -161,8 +163,19 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <tbody>
                             <?php foreach ($items as $it): ?>
                                 <tr>
-                                    <td><input name="item_code[]" class="form-control" value="<?= htmlspecialchars($it['item_code']) ?>"></td>
-                                    <td><input name="hs_code[]" class="form-control" value="<?= htmlspecialchars($it['hs_code']) ?>"></td>
+                                    <!-- Hidden field for existing item ID -->
+                                    <input type="hidden" name="item_id[]" value="<?= $it['id'] ?>">
+                                    <td class="d-none"><input name="item_code[]" class="form-control" value="0001"></td>
+                                    <td style="width: 150px;">
+                                        <select class="form-select" name="hs_code[]" required>
+                                            <option disabled>Select</option>
+                                            <?php foreach ($hs_codes as $c): ?>
+                                                <option value="<?= htmlspecialchars($c['hs_code']) ?>" <?= $it['hs_code'] == $c['hs_code'] ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($c['hs_code']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </td>
                                     <td><input name="item_name[]" class="form-control" value="<?= htmlspecialchars($it['item_name']) ?>"></td>
                                     <td><input name="qty[]" class="form-control qty" value="<?= $it['qty'] ?>" type="number" step="0.01"></td>
                                     <td><input name="unit[]" class="form-control" value="<?= htmlspecialchars($it['unit']) ?>"></td>
@@ -216,7 +229,7 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <form id="customerForm" class="p-3">
                     <div class="modal-header">
                         <h5 class="modal-title" id="customerModalLabel">Add New Customer</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
                         <input name="code" placeholder="Customer Code" class="form-control mb-2" required>
@@ -231,63 +244,57 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary">Save Customer</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closeModal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Bootstrap JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
 
     <script>
-        // Show bootstrap modal
         const customerModal = new bootstrap.Modal(document.getElementById('customerModal'));
 
-        document.getElementById('addCustomerBtn').addEventListener('click', () => {
-            customerModal.show();
-        });
+        // HS Codes array for dynamic row
+        const hsCodes = <?php echo json_encode(array_column($hs_codes, 'hs_code')); ?>;
 
-        // Handle customer form submit via AJAX
+        document.getElementById('addCustomerBtn').addEventListener('click', () => customerModal.show());
         document.getElementById('customerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             fetch('save_customer.php', {
                     method: 'POST',
                     body: new FormData(this)
                 })
-                .then(res => res.json())
-                .then(data => {
+                .then(res => res.json()).then(data => {
                     if (data.status === 'success') {
-                        // Hide modal and reload customers dropdown
                         customerModal.hide();
                         loadCustomers();
-                    } else {
-                        alert(data.message);
-                    }
+                    } else alert(data.message);
                 });
         });
 
-        // Reload customer dropdown options
         function loadCustomers() {
-            fetch('get_customers.php')
-                .then(res => res.json())
-                .then(data => {
-                    const dropdown = document.getElementById('customer_id');
-                    dropdown.innerHTML = '<option value="">Select Customer</option>';
-                    data.forEach(c => {
-                        dropdown.innerHTML += `<option value="${c.id}">${c.name} (${c.code})</option>`;
-                    });
+            fetch('get_customers.php').then(res => res.json()).then(data => {
+                const dropdown = document.getElementById('customer_id');
+                dropdown.innerHTML = '<option value="">Select Customer</option>';
+                data.forEach(c => {
+                    dropdown.innerHTML += `<option value="${c.id}">${c.name} (${c.code})</option>`;
                 });
+            });
         }
+
         document.getElementById('addRowBtn').addEventListener('click', function() {
             const tbody = document.querySelector('#itemsTable tbody');
             const row = document.createElement('tr');
+            let hsOptions = '<option disabled selected>Select</option>';
+            hsCodes.forEach(code => {
+                hsOptions += `<option value="${code}">${code}</option>`;
+            });
             row.innerHTML = `
-                <td><input name="item_code[]" class="form-control"></td>
-                <td><input name="hs_code[]" class="form-control"></td>
+                <input type="hidden" name="item_id[]" value="">
+                <input type="hidden" name="item_code[]" value="0001">
+                <td style="width: 150px;"><select class="form-select" name="hs_code[]" required>${hsOptions}</select></td>
                 <td><input name="item_name[]" class="form-control"></td>
                 <td><input name="qty[]" class="form-control qty" type="number" step="0.01"></td>
                 <td><input name="unit[]" class="form-control"></td>
@@ -305,11 +312,17 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
         function bindEvents() {
             document.querySelectorAll('.removeRow').forEach(btn => {
                 btn.onclick = () => {
-                    btn.closest('tr').remove();
-                    updateTotals();
+                    const tbody = document.querySelector('#itemsTable tbody');
+                    if (tbody.querySelectorAll('tr').length > 1) {
+                        btn.closest('tr').remove();
+                        updateTotals();
+                    } else {
+                        alert("You must have at least one row in the invoice.");
+                    }
                 };
             });
 
+            // Calculate amounts on input
             document.querySelectorAll('#itemsTable tbody tr').forEach(row => {
                 const qty = row.querySelector('.qty');
                 const rate = row.querySelector('.rate');
@@ -339,7 +352,6 @@ $customers = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 total += parseFloat(row.querySelector('.exclTax').value) || 0;
             });
             document.getElementById('totalAmount').value = total.toFixed(2);
-
             const discountPct = parseFloat(document.getElementById('discount').value) || 0;
             const taxPct = parseFloat(document.getElementById('tax').value) || 0;
             let afterDisc = total - (total * discountPct / 100);

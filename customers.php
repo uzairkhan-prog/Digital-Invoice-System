@@ -87,7 +87,7 @@ $customers = $stmt->fetchAll();
                                 <th>CNIC</th>
                                 <th>Email</th>
                                 <th>Phone</th>
-                                <th>City</th>
+                                <!-- <th>City</th> -->
                                 <th>STRN</th>
                                 <th>NTN</th>
                                 <th class="text-center">Actions</th>
@@ -105,7 +105,7 @@ $customers = $stmt->fetchAll();
                                     <td><?= htmlspecialchars($c['cnic']) ?></td>
                                     <td><?= htmlspecialchars($c['email']) ?></td>
                                     <td><?= htmlspecialchars($c['phone']) ?></td>
-                                    <td><?= htmlspecialchars($c['city']) ?></td>
+                                    <!-- <td><?= htmlspecialchars($c['city']) ?></td> -->
                                     <td><?= htmlspecialchars($c['strn']) ?></td>
                                     <td><?= htmlspecialchars($c['ntn']) ?></td>
                                     <td class="text-center action-buttons">
