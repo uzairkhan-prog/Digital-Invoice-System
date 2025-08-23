@@ -180,11 +180,6 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
             vertical-align: middle;
         }
 
-        .table-responsive .table tfoot tr th {
-            background-color: #198754;
-            color: #fff;
-        }
-
         .table td,
         .table th {
             font-size: 10px;
@@ -225,11 +220,6 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                 border: none;
                 margin: 0;
             }
-        }
-
-        /* Force page breaks for long tables */
-        .page-break {
-            page-break-before: always;
         }
 
         table,
@@ -279,7 +269,6 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                 <div class="col-md-7">
                     <h6>Bill To:</h6>
                     <p><strong>Customer:</strong> <?= htmlspecialchars($invoice['customer_name']) ?></p>
-                    <!-- <p><strong>Province:</strong> <?= nl2br(htmlspecialchars($invoice['customer_city'])) ?></p> -->
                     <p><strong>Address:</strong> <?= nl2br(htmlspecialchars($invoice['customer_address'])) ?></p>
                     <p><strong>Phone:</strong> <?= htmlspecialchars($invoice['customer_phone']) ?></p>
                     <p><strong>Email:</strong> <?= htmlspecialchars($invoice['customer_email']) ?></p>
@@ -299,7 +288,6 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                     <thead>
                         <tr>
                             <th>#</th>
-                            <!-- <th>Item Code</th> -->
                             <th>HS Code</th>
                             <th>Item Name</th>
                             <th>Qty</th>
@@ -308,6 +296,8 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                             <th>Disc %</th>
                             <th>Discount</th>
                             <th>Excl. Tax</th>
+                            <th>Tax %</th>
+                            <th>Tax Amt</th>
                             <th>Total</th>
                         </tr>
                     </thead>
@@ -315,7 +305,6 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                         <?php foreach ($items as $i => $item): ?>
                             <tr>
                                 <td><?= $i + 1 ?></td>
-                                <!-- <td><?= htmlspecialchars($item['item_code']) ?></td> -->
                                 <td><?= htmlspecialchars($item['hs_code']) ?></td>
                                 <td><?= htmlspecialchars($item['item_name']) ?></td>
                                 <td><?= nf($item['qty'], 0) ?></td>
@@ -324,6 +313,8 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                                 <td><?= nf($item['disc_perc']) ?></td>
                                 <td><?= nf($item['discount']) ?></td>
                                 <td><?= nf($item['excl_tax_amt']) ?></td>
+                                <td><?= nf($item['tax_perc']) ?></td>
+                                <td><?= nf($item['tax_amt']) ?></td>
                                 <td><?= nf($item['amount']) ?></td>
                             </tr>
                         <?php endforeach; ?>
@@ -336,19 +327,23 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                 <div class="col-md-6">
                     <table class="table">
                         <tr>
-                            <th>Gross Total:</th>
+                            <th>Gross Total (Excl. Tax):</th>
                             <td><?= nf($invoice['gross_total']) ?></td>
                         </tr>
                         <tr>
-                            <th>Discount (%):</th>
-                            <td><?= nf($invoice['discount']) ?></td>
+                            <th>Less: Discount (<?= nf($invoice['discount']) ?>%)</th>
+                            <td>- <?= nf($invoice['gross_total'] * $invoice['discount'] / 100) ?></td>
                         </tr>
                         <tr>
-                            <th>Tax (%):</th>
-                            <td><?= nf($invoice['tax']) ?></td>
+                            <th>Sub Total:</th>
+                            <td><?= nf($invoice['gross_total'] - ($invoice['gross_total'] * $invoice['discount'] / 100)) ?></td>
+                        </tr>
+                        <tr>
+                            <th>Add: Tax (<?= nf($invoice['tax']) ?>%)</th>
+                            <td>+ <?= nf(($invoice['gross_total'] - ($invoice['gross_total'] * $invoice['discount'] / 100)) * $invoice['tax'] / 100) ?></td>
                         </tr>
                         <tr class="fw-bold">
-                            <th>Grand Total:</th>
+                            <th>Grand Total (Incl. Tax):</th>
                             <td><?= nf($invoice['grand_total']) ?></td>
                         </tr>
                     </table>
@@ -390,24 +385,12 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
         function downloadPDF() {
             const element = document.getElementById('invoice-content');
             const opt = {
-                margin: [0.2, 0.2, 0.2, 0.2], // top, left, bottom, right
+                margin: [0.2, 0.2, 0.2, 0.2],
                 filename: 'Invoice_<?= htmlspecialchars($invoice['serial_no']) ?>.pdf',
-                image: {
-                    type: 'jpeg',
-                    quality: 0.98
-                },
-                html2canvas: {
-                    scale: 2,
-                    useCORS: true
-                },
-                jsPDF: {
-                    unit: 'in',
-                    format: 'a4',
-                    orientation: 'portrait'
-                },
-                pagebreak: {
-                    mode: ['avoid-all', 'css', 'legacy']
-                }
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
             html2pdf().set(opt).from(element).save();
         }
