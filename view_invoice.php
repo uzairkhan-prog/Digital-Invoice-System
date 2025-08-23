@@ -275,10 +275,10 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                 </div>
                 <div class="col-md-5 text-end">
                     <h6>Invoice Info:</h6>
-                    <p><strong>Invoice Type:</strong> <?= htmlspecialchars($invoice['invoice_type']) ?></p>
+                    <p><strong>Invoice Type:</strong> <br> <?= htmlspecialchars($invoice['invoice_type']) ?></p>
                     <p><strong>PO No:</strong> <?= htmlspecialchars($invoice['po_no'] ?? 'N/A') ?></p>
                     <p><strong>Terms of Payment:</strong> <?= htmlspecialchars($invoice['terms_of_payment'] ?? 'N/A') ?></p>
-                    <p><strong>Scenario ID:</strong> <?= htmlspecialchars($invoice['scenario_id'] ?? 'N/A') ?></p>
+                    <!-- <p><strong>Scenario ID:</strong> <?= htmlspecialchars($invoice['scenario_id'] ?? 'N/A') ?></p> -->
                 </div>
             </div>
 
