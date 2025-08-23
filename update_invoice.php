@@ -11,19 +11,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fbr_invoice_no = $_POST['fbr_invoice_no'];
     $po_no = $_POST['po_no'];
     $terms_of_payment = $_POST['terms_of_payment'];
-    $discount = floatval($_POST['discount']);
-    $tax = floatval($_POST['tax']);
 
-    $gross_total = array_sum(array_map('floatval', $_POST['excl_tax_amt']));
-    $after_discount = $gross_total - ($gross_total * $discount / 100);
-    $grand_total = $after_discount + ($after_discount * $tax / 100);
+    // Recalculate totals per item to match frontend
+    $gross_total = 0;
+    $grand_total = 0;
+
+    foreach ($_POST['qty'] as $i => $qty) {
+        $qty = floatval($qty);
+        $rate = floatval($_POST['rate'][$i]);
+        $discPerc = floatval($_POST['disc_perc'][$i]);
+        $taxPerc = floatval($_POST['tax_perc'][$i]);
+
+        $amt = $qty * $rate;
+        $disc = $amt * ($discPerc / 100);
+        $excl_tax_amt = $amt - $disc;
+        $tax_amt = $excl_tax_amt * ($taxPerc / 100);
+        $totalAmt = $excl_tax_amt + $tax_amt;
+
+        $gross_total += $excl_tax_amt;
+        $grand_total += $totalAmt;
+
+        // overwrite the individual POST values to store in DB
+        $_POST['discount'][$i] = $disc;
+        $_POST['excl_tax_amt'][$i] = $excl_tax_amt;
+        $_POST['tax_amt'][$i] = $tax_amt;
+        $_POST['amount'][$i] = $totalAmt;
+    }
 
     $pdo->beginTransaction();
     try {
         // Update invoice
         $stmt = $pdo->prepare("UPDATE invoices SET
             serial_no = ?, date = ?, invoice_type = ?, scenario_id = ?, customer_id = ?,
-            discount = ?, tax = ?, gross_total = ?, grand_total = ?, fbr_invoice_no = ?, po_no = ?, terms_of_payment = ?
+            gross_total = ?, grand_total = ?, fbr_invoice_no = ?, po_no = ?, terms_of_payment = ?
             WHERE id = ?");
 
         $stmt->execute([
@@ -32,8 +52,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $invoice_type,
             $scenario_id,
             $customer_id,
-            $discount,
-            $tax,
             $gross_total,
             $grand_total,
             $fbr_invoice_no,

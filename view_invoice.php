@@ -7,8 +7,9 @@ if (!$id) {
     header('Location: index.php');
     exit;
 }
-$id = (int) $id;
+$id = (int)$id;
 
+// Fetch invoice
 $stmt = $pdo->prepare("
   SELECT invoices.*, customers.name AS customer_name, customers.address AS customer_address,
          customers.email AS customer_email, customers.phone AS customer_phone, customers.city AS customer_city
@@ -23,78 +24,69 @@ if (!$invoice) {
     exit;
 }
 
+// Fetch invoice items
 $itemStmt = $pdo->prepare("SELECT * FROM invoice_items WHERE invoice_id = ?");
 $itemStmt->execute([$id]);
 $items = $itemStmt->fetchAll();
 
-function nf($number, $decimals = 2)
-{
+// print_r($items); // Debugging line to check fetched items
+// exit;
+
+// ===== CALCULATE TOTALS =====
+$gross_total = 0;
+$discount_total = 0;
+$tax_total = 0;
+$grand_total = 0;
+
+foreach ($items as $key => $item) {
+    $items[$key]['discount'] = ($item['rate'] * $item['qty']) * ($item['disc_perc'] / 100);
+    $items[$key]['excl_tax_amt'] = ($item['rate'] * $item['qty']) - $items[$key]['discount'];
+    $items[$key]['tax_amt'] = $items[$key]['excl_tax_amt'] * ($item['tax_perc'] / 100);
+    $items[$key]['amount'] = $items[$key]['excl_tax_amt'] + $items[$key]['tax_amt'];
+
+    $gross_total += $item['rate'] * $item['qty'];
+    $discount_total += $items[$key]['discount'];
+    $tax_total += $items[$key]['tax_amt'];
+    $grand_total += $items[$key]['amount'];
+}
+
+// ===== HELPER FUNCTIONS =====
+function nf($number, $decimals = 2) {
     return number_format((float)$number, $decimals);
 }
 
-function convertNumberToWords($number)
-{
+function convertNumberToWords($number) {
     $no = floor($number);
     $point = round($number - $no, 2) * 100;
-    $hundred = null;
-    $digits_1 = strlen($no);
-    $i = 0;
-    $str = [];
     $words = array(
-        '0' => '',
-        '1' => 'One',
-        '2' => 'Two',
-        '3' => 'Three',
-        '4' => 'Four',
-        '5' => 'Five',
-        '6' => 'Six',
-        '7' => 'Seven',
-        '8' => 'Eight',
-        '9' => 'Nine',
-        '10' => 'Ten',
-        '11' => 'Eleven',
-        '12' => 'Twelve',
-        '13' => 'Thirteen',
-        '14' => 'Fourteen',
-        '15' => 'Fifteen',
-        '16' => 'Sixteen',
-        '17' => 'Seventeen',
-        '18' => 'Eighteen',
-        '19' => 'Nineteen',
-        '20' => 'Twenty',
-        '30' => 'Thirty',
-        '40' => 'Forty',
-        '50' => 'Fifty',
-        '60' => 'Sixty',
-        '70' => 'Seventy',
-        '80' => 'Eighty',
-        '90' => 'Ninety'
+        '0' => '', '1' => 'One', '2' => 'Two', '3' => 'Three', '4' => 'Four',
+        '5' => 'Five', '6' => 'Six', '7' => 'Seven', '8' => 'Eight', '9' => 'Nine',
+        '10' => 'Ten','11' => 'Eleven','12' => 'Twelve','13' => 'Thirteen','14' => 'Fourteen',
+        '15' => 'Fifteen','16' => 'Sixteen','17' => 'Seventeen','18' => 'Eighteen','19' => 'Nineteen',
+        '20' => 'Twenty','30' => 'Thirty','40' => 'Forty','50' => 'Fifty','60' => 'Sixty',
+        '70' => 'Seventy','80' => 'Eighty','90' => 'Ninety'
     );
     $digits = ['', 'Hundred', 'Thousand', 'Lakh', 'Crore'];
+    $i = 0;
+    $str = [];
+    $digits_1 = strlen($no);
     while ($i < $digits_1) {
         $divider = ($i == 2) ? 10 : 100;
         $number = floor($no % $divider);
         $no = floor($no / $divider);
         $i += ($divider == 10) ? 1 : 2;
         if ($number) {
-            $plural = (($counter = count($str)) && $number > 9) ? '' : null;
-            $hundred = ($counter == 1 && $str[0]) ? ' and ' : null;
-            $str[] = ($number < 21) ? $words[$number] .
-                " " . $digits[count($str)] . $plural . " " . $hundred
-                :
-                $words[floor($number / 10) * 10]
-                . " " . $words[$number % 10] . " "
-                . $digits[count($str)] . $plural . " " . $hundred;
+            $str[] = ($number < 21) ? $words[$number] . " " . $digits[count($str)]
+                : $words[floor($number / 10) * 10] . " " . $words[$number % 10] . " " . $digits[count($str)];
         } else $str[] = null;
     }
     $str = array_reverse($str);
-    $result = implode('', $str);
-    $points = ($point) ?
-        "and " . $words[floor($point / 10) * 10] . " " . $words[$point % 10] . " Paise" : '';
-    return ucfirst(trim($result)) . "Rupees Only " . $points . " /-";
+    $result = implode(' ', $str);
+    $points = ($point) ? "and " . $words[floor($point / 10) * 10] . " " . $words[$point % 10] . " Paise" : '';
+    return ucfirst(trim($result)) . " Rupees Only " . $points . " /-";
 }
 
-$amountInWords = convertNumberToWords($invoice['grand_total']);
+$amountInWords = convertNumberToWords($grand_total);
 ?>
 
 <!DOCTYPE html>
@@ -105,7 +97,6 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
     <title>Invoice #<?= htmlspecialchars($invoice['serial_no']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
     <style>
         body {
             background-color: #f8f9fa;
@@ -119,7 +110,7 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
             margin: auto;
             padding: 30px 10px;
             border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 0 20px rgba(0, 0, 0, .05);
         }
 
         .company-info {
@@ -139,6 +130,10 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
             font-size: 12px;
         }
 
+        .invoice-details p {
+            margin-bottom: 5px;
+        }
+
         .invoice-title {
             font-size: 20px;
             font-weight: bold;
@@ -149,13 +144,12 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
             color: #dc3545;
         }
 
-        .invoice-header {
-            margin-bottom: 10px;
-        }
-
-        .invoice-details p {
-            margin: 0;
-            font-size: 12px;
+        .logo {
+            width: 250px;
+            height: auto;
+            background: #041a2a;
+            border-radius: 5px;
+            padding: 0 10px;
         }
 
         .table thead {
@@ -174,10 +168,6 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
         .table-bordered th,
         .table-bordered td {
             border: 1px solid #dee2e6;
-        }
-
-        .table tbody td {
-            vertical-align: middle;
         }
 
         .table td,
@@ -233,18 +223,20 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
 
 <body>
     <div class="container py-4">
-
-        <!-- Buttons -->
         <div class="mb-4 text-center no-print">
             <a href="index.php" class="btn btn-secondary me-2">Back</a>
             <button class="btn btn-primary" onclick="downloadPDF()">Export as PDF</button>
         </div>
 
         <div class="invoice-box" id="invoice-content">
-
-            <!-- Company Info -->
             <div class="company-info">
-                <h2>Vibrant Engineering</h2>
+                <h2>
+                    <?php
+                        $logo_url = "https://vibrantengineering.pk/wp-content/uploads/2023/08/check-logo.png";
+                        $logo_data = base64_encode(file_get_contents($logo_url));
+                    ?>
+                    <img src="data:image/png;base64,<?= $logo_data ?>" alt="Logo" class="logo">
+                </h2>
                 <p>SHOP NO 13, FALAK PARK VIEW, NEAR ENQUIRY OFFICE NAZIMABAD Block 2</p>
                 <p>District Central Nazimabad, KARACHI</p>
                 <p>NTN: 4881920-5 &nbsp;&nbsp;&nbsp; STRN: 3277876243544</p>
@@ -252,8 +244,7 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
 
             <div class="invoice-title">SALE TAX INVOICE</div>
 
-            <!-- Invoice Header -->
-            <div class="d-flex justify-content-between invoice-header">
+            <div class="d-flex justify-content-between invoice-header mb-3">
                 <div>
                     <strong>Invoice #: </strong><?= htmlspecialchars($invoice['serial_no']) ?><br>
                     <strong>Date: </strong><?= htmlspecialchars($invoice['date']) ?>
@@ -264,7 +255,6 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                 </div>
             </div>
 
-            <!-- Invoice Details -->
             <div class="row mb-3 invoice-details">
                 <div class="col-md-7">
                     <h6>Bill To:</h6>
@@ -278,11 +268,9 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                     <p><strong>Invoice Type:</strong> <br> <?= htmlspecialchars($invoice['invoice_type']) ?></p>
                     <p><strong>PO No:</strong> <?= htmlspecialchars($invoice['po_no'] ?? 'N/A') ?></p>
                     <p><strong>Terms of Payment:</strong> <?= htmlspecialchars($invoice['terms_of_payment'] ?? 'N/A') ?></p>
-                    <!-- <p><strong>Scenario ID:</strong> <?= htmlspecialchars($invoice['scenario_id'] ?? 'N/A') ?></p> -->
                 </div>
             </div>
 
-            <!-- Items Table -->
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
@@ -322,35 +310,33 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                 </table>
             </div>
 
-            <!-- Totals -->
             <div class="row justify-content-end">
                 <div class="col-md-6">
                     <table class="table">
                         <tr>
                             <th>Gross Total (Excl. Tax):</th>
-                            <td><?= nf($invoice['gross_total']) ?></td>
+                            <td><?= nf($gross_total) ?></td>
                         </tr>
                         <tr>
-                            <th>Less: Discount (<?= nf($invoice['discount']) ?>%)</th>
-                            <td>- <?= nf($invoice['gross_total'] * $invoice['discount'] / 100) ?></td>
+                            <th>Total Discount:</th>
+                            <td>- <?= nf($discount_total) ?></td>
                         </tr>
                         <tr>
-                            <th>Sub Total:</th>
-                            <td><?= nf($invoice['gross_total'] - ($invoice['gross_total'] * $invoice['discount'] / 100)) ?></td>
+                            <th>Sub Total (After Discount):</th>
+                            <td><?= nf($gross_total - $discount_total) ?></td>
                         </tr>
                         <tr>
-                            <th>Add: Tax (<?= nf($invoice['tax']) ?>%)</th>
-                            <td>+ <?= nf(($invoice['gross_total'] - ($invoice['gross_total'] * $invoice['discount'] / 100)) * $invoice['tax'] / 100) ?></td>
+                            <th>Total Tax:</th>
+                            <td>+ <?= nf($tax_total) ?></td>
                         </tr>
                         <tr class="fw-bold">
                             <th>Grand Total (Incl. Tax):</th>
-                            <td><?= nf($invoice['grand_total']) ?></td>
+                            <td><?= nf($grand_total) ?></td>
                         </tr>
                     </table>
                 </div>
             </div>
 
-            <!-- Amount in Words -->
             <div class="row">
                 <div class="col-md-12 text-center">
                     <strong>AMOUNT IN WORDS :</strong>
@@ -358,7 +344,6 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                 </div>
             </div>
 
-            <!-- Signatures -->
             <div class="row">
                 <div class="col-md-6 text-center">
                     <div class="signature-box"></div>
@@ -372,12 +357,12 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
                 </div>
             </div>
 
-            <!-- Thank You -->
             <div class="row">
                 <div class="col-md-12 mt-3 text-center">
                     <p><strong>THANK YOU FOR YOUR BUSINESS !</strong></p>
                 </div>
             </div>
+
         </div>
     </div>
 
@@ -387,11 +372,33 @@ $amountInWords = convertNumberToWords($invoice['grand_total']);
             const opt = {
                 margin: [0.2, 0.2, 0.2, 0.2],
                 filename: 'Invoice_<?= htmlspecialchars($invoice['serial_no']) ?>.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' },
-                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+                image: {
+                    type: 'jpeg',
+                    quality: 0.98
+                },
+                html2canvas: {
+                    scale: 2,
+                    useCORS: true,
+                    allowTaint: true
+                },
+                jsPDF: {
+                    unit: 'in',
+                    format: 'a4',
+                    orientation: 'portrait'
+                },
+                pagebreak: {
+                    mode: ['avoid-all', 'css', 'legacy']
+                }
             };
+
+            // Add crossOrigin attribute to all external images in the invoice
+            const imgs = element.getElementsByTagName('img');
+            for (let i = 0; i < imgs.length; i++) {
+                if (!imgs[i].crossOrigin) {
+                    imgs[i].crossOrigin = "anonymous";
+                }
+            }
+
             html2pdf().set(opt).from(element).save();
         }
     </script>
