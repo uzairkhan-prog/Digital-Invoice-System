@@ -115,13 +115,13 @@ $amountInWords = convertNumberToWords($grand_total);
 
         .company-info {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         .company-info h2 {
             font-size: 24px;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             color: #3d4fab;
         }
 
